@@ -10,4 +10,4 @@ For more information about the code, please refer to BinaryTree.h and my blog:
 
 To build the code, use command:
 
-	g++ -std=c++11 -o <test> BTtraverse.h <test_file>.cc
+	g++ -std=c++11 -o <test> BinaryTree.h <test_file>.cc
