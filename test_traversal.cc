@@ -1,5 +1,5 @@
 #include <iostream>
-#include "BTtraverse.h"
+#include "BinaryTree.h"
 
 using namespace std;
 

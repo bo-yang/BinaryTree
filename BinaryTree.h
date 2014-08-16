@@ -1,34 +1,42 @@
-#ifndef BTTRAVERSE_H
-#define BTTRAVERSE_H
+#ifndef BINARYTREE_H
+#define BINARYTREE_H
+
 ////////////////////////////////////////////////////////////////
 //
-// BTtraverse.h - Library of Binary Tree Traversals.
+// This is a simple library of Binary Tree, which implements commonly used 
+// binary tree operations, including building binary tree, tree traversal, 
+// tree comparison, sum of path and cycle detection.
 //
-// This file contains the code of building a binary tree from 
-// vector of strings(level-by-level representation), printing the
-// binary tree and four traversal methods: preorder, inorder, postorder
+// 1. Building Binary Tree
+// This file contains the code of building a binary tree(with or without loop)
+// from a vector of strings(level-by-level representation). Function BuildTree()
+// can be used to build a binary tree without loop, and function BuildCycleTree()
+// is used to link two nodes and make loops in a binary tree.
+//
+// 2. Tree Traversal
+// Four traversal methods are supported in this library: preorder, inorder, postorder
 // and zigzag level order. 
 //
-// Preorder traversal: (i) Visit the root, (ii) Traverse the left 
-// subtree, and (iii) Traverse the right subtree.
+// Preorder traversal: (i) Visit the root, (ii) Traverse the left subtree, and
+// (iii) Traverse the right subtree.
 //
-// Inorder traversal: (i) Traverse the leftmost subtree starting at
-// the left external node, (ii) Visit the root, and (iii) Traverse 
-// the right subtree starting at the left external node.
+// Inorder traversal: (i) Traverse the leftmost subtree starting at the left 
+// external node, (ii) Visit the root, and (iii) Traverse the right subtree 
+// starting at the left external node.
 //
-// Postorder traversal: (i) Traverse all the left external nodes 
-// starting with the leftmost subtree which is then followed by 
-// bubble-up all the internal nodes, (ii) Traverse the right subtree
-// starting at the left external node which is then followed by 
-// bubble-up all the internal nodes, and (iii) Visit the root.
+// Postorder traversal: (i) Traverse all the left external nodes starting with 
+// the leftmost subtree which is then followed by bubble-up all the internal
+// nodes, (ii) Traverse the right subtree starting at the left external node
+// which is then followed by bubble-up all the internal nodes, and (iii) Visit
+// the root.
 //
-// While the above three traversals are Dept First Traversal, Zigzag
-// level order traversal is a Breadth First Traversal. The procedure 
-// of this traversal is (i) from left to right, (ii) then right to left
-// for the next level, (iii) and alternate between).
+// While the above three traversals are Dept First Traversal, Zigzag level order
+// traversal is a Breadth First Traversal. The procedure of this traversal is 
+// (i) from left to right, (ii) then right to left for the next level, 
+// (iii) and alternate between).
 //
-// For example, given sequence {1,2,3,#,#,4,#,#,5}, following binary 
-// tree can be built:
+// For example, given sequence {1,2,3,#,#,4,#,#,5,6}, following binary tree can be
+// built:
 // 	   1
 //	  / \
 //	 2   3
@@ -41,14 +49,27 @@
 // The postorder traversal is: 2,5,6,4,3,1.
 // The zigzag traversal is: [[1],[3,2],[4],[6,5]].
 //
-// Same Tree:
-// Two binary trees are considered equal if they are structurally 
-// identical and the nodes have the same value.
+// 3. Same Tree:
+// Two binary trees are considered equal if they are structurally identical and
+// the nodes have the same value.
+//
+// 4. Path Sum
+// Given a binary tree and a sum, determine if the tree has a root-to-leaf path such
+// that adding up all the values along the path equals the given sum. Level-order
+// traversal is used to find all the paths meet the requirement.
+//
+// 5. Cycle Detection
+// Cycles in a binary tree can be detected by DFS(in preorder) - if there's a cycle, 
+// there must be a node has a child node that is already been accessed before(i.e. 
+// a right hand node linked to the left hand node).
 //
 // Version 1, May 25th by Bo Yang(bonny95@gmail.com).
-// Version 1.1, May 30th by Bo Yang, added function isSameTree() and Zigzag traversal.
+// Version 1.1, May 30th by Bo Yang, added function IsSameTree() and Zigzag traversal.
+// Version 1.2, Aug 3rd by Bo Yang, added function PathSum().
+// Version 1.3, Aug 16th by Bo Yang, added functions BuildCycleTree() and HasLoop().
 // 
 ////////////////////////////////////////////////////////////////
+
 #include <iostream>
 #include <vector>
 #include <stack>
@@ -56,6 +77,8 @@
 #include <cstdlib>
 #include <queue>
 #include <list>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace std;
 
@@ -74,40 +97,17 @@ public:
 	BinaryTree() { root=NULL;layers=0; }
 	BinaryTree(vector<string>& t) { BuildTree(t); }
 	~BinaryTree() {
-		if(root!=NULL) {
-			// delete allocated nodes iteratively
-			queue<TreeNode*> q;
-			TreeNode* tmp=root;
-			q.push(tmp);
-			int nodes_cur_layer=1; // # of nodes in current layer
-			int nodes_next_layer=0;	// # of nodes in next layer
-			while(nodes_cur_layer>0) {
-				for(int i=0;i<nodes_cur_layer;++i) {
-					tmp=q.front();
-					q.pop();
-
-					if(tmp->left!=NULL) {
-						q.push(tmp->left);
-						nodes_next_layer++;
-					}
-					if(tmp->right!=NULL) {
-						q.push(tmp->right);
-						nodes_next_layer++;
-					}
-
-					delete tmp;
-				}
-				nodes_cur_layer=nodes_next_layer;
-				nodes_next_layer=0;
-			}
-		}
+		for(auto& node:all_nodes)
+			delete node;
 	}
 
 	TreeNode* GetRoot() { return root; }
 
+	//
 	// Preorder Traversal:
 	//	(i) Visit the root, (ii) Traverse the left subtree, and 
-	//	(iii) Traverse the right subtree. 	
+	//	(iii) Traverse the right subtree. 
+	//
 	vector<int> PreorderTraversal(TreeNode *root) {
 		vector<int> trace;
 		stack<TreeNode*> st;
@@ -132,10 +132,12 @@ public:
 		return trace;
 	}
 
+	//
 	// Inorder Traversal:
 	// 	(i) Traverse the leftmost subtree starting at the left external node, 
 	// 	(ii) Visit the root, and (iii) Traverse the right subtree starting at 
 	// 	the left external node.
+	//
     vector<int> InorderTraversal(TreeNode *root) {
 		vector<int> trace;
 		stack<TreeNode> st;
@@ -163,12 +165,14 @@ public:
 		return trace;
     }
 
+	// 
 	// Postorder Traversal:
 	// 	(i) Traverse all the left external nodes starting with the leftmost
 	// 	subtree which is then followed by bubble-up all the internal nodes, 
 	// 	(ii) Traverse the right subtree starting at the left external node 
 	// 	which is then followed by bubble-up all the internal nodes, and 
 	// 	(iii) Visit the root.
+	//
 	vector<int> PostorderTraversal(TreeNode *root) {
 		vector<int> trace;
 		stack<TreeNode> st;
@@ -198,6 +202,7 @@ public:
 		return trace;
 	}
 
+	//
 	// zigzag level order traversal of all nodes' values in a tree. 
 	// (ie, from left to right, then right to left for the next level
 	// and alternate between).
@@ -265,6 +270,9 @@ public:
 		return trace;
     }
 
+	// 
+	// Print the traversal path of a binary tree
+	//
 	void PrintTraversal(vector<int>& vec, string type) {
 		cout<<type<<" traversal: ";
 		for(vector<int>::iterator it=vec.begin(); it!=vec.end();++it) {
@@ -273,6 +281,9 @@ public:
 		cout<<endl;
 	}
 
+	// 
+	// Print the traversal path of a binary tree
+	//
 	void PrintTraversal(vector<vector<int> >& vec, string type) {
 		cout<<type<<" traversal: \n["<<endl;
 		for(vector<vector<int> >::iterator it=vec.begin(); it!=vec.end();++it) {
@@ -290,6 +301,10 @@ public:
 		cout<<"]"<<endl;
 	}
 
+	//
+	// This function builds a Binary Tree without cycle based on a string sequence 
+	// such as {1,2,3,#,#,4,#,#,5}, where "#" means invalid node.
+	//
 	TreeNode* BuildTree(vector<string>& t) {
 		if(t.empty())
 			return NULL;
@@ -341,7 +356,8 @@ public:
 					nodes_next_layer++;
 				}
 
-				tree->val=atoi((it+i)->c_str());
+				tree->val=stoi(*(it+i));
+				all_nodes.push_back(tree); // record all allocated memory
 			}
 
 			idx+=nodes_cur_layer;
@@ -353,7 +369,9 @@ public:
 		return root;	// root of the tree
 	}
 
+	// 
 	// Print binary tree level by level
+	// 
 	void PrintTree(TreeNode *root) {
 		queue<TreeNode*> q;
 		TreeNode* tmp=root;
@@ -385,8 +403,10 @@ public:
 		}
 	}
 
+	// 
 	// Two binary trees are considered equal if they are structurally 
 	// identical and the nodes have the same value.
+	//
 	bool IsSameTree(TreeNode *p, TreeNode *q) {
 		bool same_tree=true;
         queue<TreeNode*> qp;
@@ -437,9 +457,168 @@ public:
 		return same_tree;
     }
 
+	//
+	// Given a binary tree and a sum, find all root-to-leaf paths where each
+	// path's sum equals the given sum.
+	//
+	vector<vector<int> > PathSum(TreeNode *root, int sum) {
+	   vector<vector<int> > all_paths;
+	   if(root==NULL)
+		   return all_paths;
+
+	   queue<TreeNode*> layer;
+	   unordered_map<TreeNode*,vector<int> > path_to_now;
+	   unordered_map<TreeNode*,int> sum_to_now;
+
+	   if(root->val==sum && root->left==NULL && root->right==NULL) {
+		   vector<int> path;
+		   path.push_back(root->val);
+		   all_paths.push_back(path);
+		   return all_paths;
+	   }
+
+	   layer.push(root);
+	   path_to_now[root].push_back(root->val);
+	   sum_to_now[root]=root->val;
+	   int cur_layer_nodes=1;
+	   int next_layer_nodes=0;
+	   int cnt=0;
+	   while(!layer.empty()) {
+		   TreeNode* node=layer.front();
+		   layer.pop();
+		   cnt++;
+
+		   if(sum_to_now[node]==sum && node->left==NULL && node->right==NULL)
+			   all_paths.push_back(path_to_now[node]);
+
+		   if(node->left!=NULL) {
+		   		layer.push(node->left);
+				next_layer_nodes++;
+				path_to_now[node->left]=path_to_now[node];
+				path_to_now[node->left].push_back(node->left->val);
+				sum_to_now[node->left]=sum_to_now[node]+node->left->val;
+		   }
+
+		   if(node->right!=NULL) {
+		   		layer.push(node->right);
+				next_layer_nodes++;
+				path_to_now[node->right]=path_to_now[node];
+				path_to_now[node->right].push_back(node->right->val);
+				sum_to_now[node->right]=sum_to_now[node]+node->right->val;
+		   }
+
+		   path_to_now.erase(node);
+		   sum_to_now.erase(node);
+		   if(cnt==cur_layer_nodes) {
+			   cur_layer_nodes=next_layer_nodes;
+			   next_layer_nodes=0;
+		   }
+	   }
+
+	   return all_paths;
+    }
+
+	// Print the paths to each node
+	void PrintPath(vector<vector<int> >& all_paths) {
+		cout<<"["<<endl;
+		for(int i=0;i<all_paths.size();++i) {
+			cout<<"  [";
+			for(int j=0;j<all_paths[i].size();++j) {
+				if(j!=all_paths[i].size()-1)
+					cout<<all_paths[i][j]<<",";
+				else
+					cout<<all_paths[i][j];
+			}
+			if(i!=all_paths.size()-1)
+				cout<<"],"<<endl;
+			else 
+				cout<<"]"<<endl;
+		}
+		cout<<"]"<<endl;
+	}
+
+	//
+	// Build a binary tree with cycles based on a binary tree(no cycle) and vector of strings. 
+	// The format of the input strings is like {3->2,2->5}, where "->" means that the
+	// right node is a child node of the left node. In this case, we assume that the values
+	// of different nodes are different.
+	//
+	// Example:
+	// 	Given binary tree {1,2,3,4,#,5,#}, to make a loop, we can add new links {3->2} or {2->5}.
+	//
+	TreeNode* BuildCycleTree(TreeNode* root, vector<string>& t) {
+		unordered_map<int,TreeNode*> map; // <val,addr>
+
+		// Find all the addresses of tree nodes by level-order(BFS) traversal
+		queue<TreeNode*> q;
+		q.push(root);
+		int nCur=1;
+		while(!q.empty()) {
+			int nNext=0;
+			for(int i=0;i<nCur;++i) {
+				TreeNode* node=q.front();
+				q.pop();
+				map[node->val]=node;
+				if(node->left!=NULL) {
+					q.push(node->left);
+					nNext++;
+				}
+				if(node->right!=NULL) {
+					q.push(node->right);
+					nNext++;
+				}
+			} // end for
+			nCur=nNext;
+		} // end while
+
+		// Link nodes and make cycle
+		for(auto& str:t) {
+			int i;
+			for(i=0;str[i]!='-';++i);
+			int lnode=stoi(str.substr(0,i));
+			int rnode=stoi(str.substr(i+2));
+			if(map[lnode]->left==NULL)
+				map[lnode]->left=map[rnode];
+			else if(map[lnode]->right==NULL)
+				map[lnode]->right=map[rnode];
+			else
+				cerr<<"Error: "<<lnode<<" already has two child nodes!"<<endl;
+		}
+
+		return root;
+	}
+
+	// 
+	// Detect if a binary tree contains a cycle. Cycles in a binary tree can be 
+	// detected by DFS(preorder) - if there's a cycle, there must be a node that 
+	// has a child node already been accessed before.
+	//
+	bool HasLoop(TreeNode* root) {
+		unordered_set<TreeNode*> set; // store nodes have been accessed
+		stack<TreeNode*> st;
+		st.push(root);
+		while(!st.empty()) {
+			TreeNode* node=st.top();
+			st.pop();
+			unordered_set<TreeNode*>::iterator got=set.find(node);
+			if(got!=set.end())
+				return true;
+			else
+				set.insert(node);
+
+			if(node->left!=NULL)
+				st.push(node->left);
+			if(node->right!=NULL)
+				st.push(node->right);
+
+		}
+		return false;
+	}
+
 private:
 	TreeNode* root;
+	vector<TreeNode*> all_nodes; // record all tree nodes, used for releasing memory
 	int layers;	// number of layers
 };
 
-#endif
+#endif // BINARYTREE_H

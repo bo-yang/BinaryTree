@@ -1,10 +1,13 @@
 BinaryTree
 ==========
 
-A library for Binary Tree operations, including building binary tree, traversals, comparison, printing and so on.
+This is a simple library of Binary Tree, which implements commonly used binary tree operations, including building binary tree, tree traversal, tree comparison, sum of path and cycle detection.
 
-For more information about the code, please refer to my blog: http://bo-yang.github.io/2014/05/26/binary-tree-traversal/.
+For more information about the code, please refer to BinaryTree.h and my blog: 
 
-To test the code, use command:
-	g++ -o bt_traveral BTtraverse.h main.cc
-	./bt_traveral
+1. http://bo-yang.github.io/2014/05/26/binary-tree-traversal/.
+2. 
+
+To build the code, use command:
+
+	g++ -std=c++11 -o <test> BTtraverse.h <test_file>.cc
