@@ -73,6 +73,10 @@
 // Version 1.2, Aug 3rd by Bo Yang, added function PathSum().
 // Version 1.3, Aug 16th by Bo Yang, added functions BuildCycleTree() and HasLoop().
 // Version 1.4, Sep 2nd by Bo Yang, added function Convert2DL().
+//
+// TODO:
+// 	1. Add copy constructor and overload assignment operator=.
+// 	2. Use gneric programming.
 // 
 ////////////////////////////////////////////////////////////////
 
