@@ -7,6 +7,7 @@ For more information about the code, please refer to `BinaryTree.h` and my blog:
 
 1. http://bo-yang.github.io/2014/05/26/binary-tree-traversal/.
 2. http://bo-yang.github.io/2014/08/16/binary-tree-ii/.
+3. http://bo-yang.github.io/2014/09/12/binary-tree-iii/. 
 
 To build the code, use command:
 
