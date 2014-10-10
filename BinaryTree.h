@@ -68,11 +68,17 @@
 // pointer to left (or first) child and another pointer to next sibling. So siblings 
 // at every level are connected from left to right.
 //
+// 7. Check if a binary tree is Binary Search Tree
+// The strategy is to recursively check (1) if the maximum value in the left subtree
+// is smaller than the root node, and (2) if the minimum value in the right subtree
+// is greater than the root node.
+//
 // Version 1, May 25th by Bo Yang(bonny95@gmail.com).
 // Version 1.1, May 30th by Bo Yang, added function IsSameTree() and Zigzag traversal.
 // Version 1.2, Aug 3rd by Bo Yang, added function PathSum().
 // Version 1.3, Aug 16th by Bo Yang, added functions BuildCycleTree() and HasLoop().
 // Version 1.4, Sep 2nd by Bo Yang, added function Convert2DL().
+// Version 1.5, Oct 9th by Bo Yang, added functions IsBST() and IsBSTHelper().
 //
 // TODO:
 // 	1. Add copy constructor and overload assignment operator=.
@@ -89,6 +95,8 @@
 #include <list>
 #include <unordered_map>
 #include <unordered_set>
+#include <climits>
+#include <cassert>
 
 using namespace std;
 
@@ -724,6 +732,42 @@ public:
 			if(head!=NULL)
 				cout<<"|"<<endl;
 		}
+	}
+
+	// 
+	// Given a binary tree, determine if it is a valid Binary Search Tree.
+	// A binary search tree (BST) is a node based binary tree data structure
+	// which has the following properties:
+	// 	• The left subtree of a node contains only nodes with keys less than
+	// 	the node’s key.
+	// 	• The right subtree of a node contains only nodes with keys greater 
+	// 	than the node’s key.
+	// 	• Both the left and right subtrees must also be binary search trees.
+	//
+	bool IsBST(TreeNode* root) {
+		return IsBSTHelper(root, INT_MIN, INT_MAX);
+	}
+	
+	// Helper function for checking binary search tree
+	bool IsBSTHelper(TreeNode* root, int min, int max) {
+		if(root==NULL)
+			return true;
+
+		assert(root->val > min && root->val < max);
+
+		bool bst_left=true;
+		bool bst_right=true;
+		if(root->left!=NULL && (root->left->val >= root->val || root->left->val <= min))
+			return false;
+		else
+			bst_left=IsBSTHelper(root->left, min, root->val);
+		
+		if(root->right!=NULL && (root->right->val <= root->val || root->right->val >= max))
+			return false;
+		else
+			bst_right=IsBSTHelper(root->right, root->val, max);
+
+		return (bst_left && bst_right);
 	}
 
 private:
