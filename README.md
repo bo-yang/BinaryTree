@@ -5,10 +5,10 @@ This is a simple library of Binary Tree, which implements commonly used binary t
 
 For more information about the code, please refer to `BinaryTree.h` and my blog: 
 
-1. http://bo-yang.github.io/2014/05/26/binary-tree-traversal/.
-2. http://bo-yang.github.io/2014/08/16/binary-tree-ii/.
-3. http://bo-yang.github.io/2014/09/12/binary-tree-iii/.
-4. http://bo-yang.github.io/2014/10/09/is-valid-bst/.
+1. http://bo-yang.github.io/2014/05/26/binary-tree-traversal.
+2. http://bo-yang.github.io/2014/08/16/binary-tree-ii.
+3. http://bo-yang.github.io/2014/09/12/binary-tree-iii.
+4. http://bo-yang.github.io/2014/10/09/is-valid-bst.
 
 To build the code, use command:
 
